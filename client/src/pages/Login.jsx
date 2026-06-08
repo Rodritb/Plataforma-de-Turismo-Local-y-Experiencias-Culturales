@@ -1,10 +1,13 @@
 import { useState } from "react";
+import turistaImg from "../assets/turista.jpg";
+import adminImg from "../assets/administrator.jpg";
+import fondoImg from "../assets/sucre.png";
 
 const API_URL = "http://localhost:3000/api/auth/login";
 
 const ROLES = [
-  { id: "turista", label: "Turista", icon: "🧳", desc: "Explora y reserva experiencias" },
-  { id: "admin", label: "Administrador", icon: "🛡️", desc: "Gestión completa del sistema" },
+  { id: "turista", label: "Turista", icon: turistaImg, desc: "Explora y reserva experiencias" },
+  { id: "admin", label: "Administrador", icon: adminImg, desc: "Gestión completa del sistema" },
 ];
 
 export default function Login() {
@@ -57,9 +60,9 @@ export default function Login() {
       <div style={styles.card}>
         <div style={styles.header}>
           <div style={{ ...styles.logoBox, background: c.gradient }}>
-            <span style={{ fontSize: 24 }}>{ROLES.find(r => r.id === rol)?.icon}</span>
+            <img src={ROLES.find(r => r.id === rol)?.icon} alt={rol} style={{ width: 60, height: 60, objectFit: "contain" }} />
           </div>
-          <h1 style={styles.title}>Turismo Local</h1>
+          <h1 style={styles.title}>SucreGO</h1>
           <p style={styles.subtitle}>Plataforma de Experiencias Culturales</p>
         </div>
 
@@ -70,11 +73,12 @@ export default function Login() {
               onClick={() => { setRol(r.id); setError(""); }}
               style={{
                 ...styles.rolBtn,
-                background: rol === r.id ? c.light : "#f8fafc",
-                borderColor: rol === r.id ? c.primary : "#e2e8f0",
-                color: rol === r.id ? c.primary : "#94a3b8",
+                background: rol === r.id ? c.light : "rgb(246, 68, 9)",
+                borderColor: rol === r.id ? c.primary : "rgb(237, 30, 11)",
+                color: rol === r.id ? c.primary : "#020d1c",
               }}>
-              <span style={{ fontSize: 18 }}>{r.icon}</span>
+
+              <img src={r.icon} alt={r.label} style={{ width: 40, height: 40, objectFit: "contain" }} />
               <span style={{ fontSize: "0.82rem", fontWeight: 600 }}>{r.label}</span>
             </button>
           ))}
@@ -128,9 +132,9 @@ export default function Login() {
 }
 
 const styles = {
-  page: { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,#f0f4ff 0%,#fafafa 60%,#fdf4ff 100%)", fontFamily: "'Segoe UI',system-ui,sans-serif", padding: "1rem" },
+  page: { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "flex-end", backgroundImage: `url(${fondoImg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", fontFamily: "'Segoe UI',system-ui,sans-serif", padding: "1rem" },
   topBar: { position: "fixed", top: 0, left: 0, right: 0, height: 4 },
-  card: { background: "#fff", borderRadius: 22, boxShadow: "0 10px 48px rgba(0,0,0,0.11)", padding: "2.25rem 2rem", width: "100%", maxWidth: 420, position: "relative", zIndex: 1 },
+  card: { background: "rgba(255,255,255,0.15)", backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", border: "1.5px solid rgba(255,255,255,0.35)", borderRadius: 22, boxShadow: "0 10px 48px rgba(0,0,0,0.3)", padding: "2.25rem 2rem", width: "100%", maxWidth: 420, position: "relative", zIndex: 1 },
   header: { textAlign: "center", marginBottom: "1.5rem" },
   logoBox: { width: 58, height: 58, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 0.9rem", boxShadow: "0 4px 18px rgba(0,0,0,0.18)", transition: "background 0.4s" },
   title: { fontSize: "1.45rem", fontWeight: 700, color: "#1e293b", margin: "0 0 0.2rem", letterSpacing: "-0.02em" },

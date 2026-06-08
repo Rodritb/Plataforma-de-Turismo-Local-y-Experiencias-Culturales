@@ -1,4 +1,5 @@
 import { useState } from "react";
+import fondoImg from "../assets/paisaje.png";
 
 const API_URL = "http://localhost:3000/api/auth/register";
 
@@ -127,9 +128,9 @@ export default function Register() {
 }
 
 const styles = {
-  page: { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,#f0f4ff,#fafafa,#fff7ed)", fontFamily: "'Segoe UI',system-ui,sans-serif", padding: "1rem" },
+  page: { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "flex-end", backgroundImage: "url(" + fondoImg + ")", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", fontFamily: "'Segoe UI',system-ui,sans-serif", padding: "1rem 3rem 1rem 1rem" },
   topBar: { position: "fixed", top: 0, left: 0, right: 0, height: 4 },
-  card: { background: "#fff", borderRadius: 22, boxShadow: "0 10px 48px rgba(0,0,0,0.11)", padding: "2rem 1.75rem", width: "100%", maxWidth: 440 },
+  card: { background: "rgba(255,255,255,0.15)", backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", border: "1.5px solid rgba(255,255,255,0.35)", borderRadius: 22, boxShadow: "0 10px 48px rgba(0,0,0,0.3)", padding: "2rem 1.75rem", width: "100%", maxWidth: 440 },
   header: { textAlign: "center", marginBottom: "1.25rem" },
   logoBox: { width: 56, height: 56, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 0.8rem", boxShadow: "0 4px 16px rgba(0,0,0,0.18)", transition: "background 0.4s" },
   title: { fontSize: "1.4rem", fontWeight: 700, color: "#1e293b", margin: "0 0 0.2rem" },

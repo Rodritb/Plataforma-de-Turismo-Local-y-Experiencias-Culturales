@@ -206,7 +206,6 @@ def crear_tabla_experiencias():
 
 crear_tabla_experiencias()
 
-# Ver todas las experiencias aprobadas (turistas)
 @app.route("/api/experiencias", methods=["GET"])
 def get_experiencias():
     categoria = request.args.get("categoria")
@@ -233,7 +232,6 @@ def get_experiencias():
             e["created_at"] = e["created_at"].isoformat()
     return jsonify(experiencias)
 
-# Ver experiencias del guía (todas incluyendo pendientes)
 @app.route("/api/experiencias/mis-experiencias", methods=["GET"])
 def get_mis_experiencias():
     payload = verificar_token(request)
@@ -252,7 +250,6 @@ def get_mis_experiencias():
             e["created_at"] = e["created_at"].isoformat()
     return jsonify(experiencias)
 
-# Ver todas las experiencias (admin)
 @app.route("/api/experiencias/todas", methods=["GET"])
 def get_todas_experiencias():
     payload = verificar_token(request)
@@ -273,7 +270,6 @@ def get_todas_experiencias():
             e["created_at"] = e["created_at"].isoformat()
     return jsonify(experiencias)
 
-# Crear experiencia (guías)
 @app.route("/api/experiencias", methods=["POST"])
 def create_experiencia():
     payload = verificar_token(request)
@@ -301,7 +297,6 @@ def create_experiencia():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-# Editar experiencia (solo el guía que la creó)
 @app.route("/api/experiencias/<int:id>", methods=["PUT"])
 def update_experiencia(id):
     payload = verificar_token(request)
@@ -331,7 +326,6 @@ def update_experiencia(id):
     db.close()
     return jsonify({"message": "Experiencia actualizada, pendiente de aprobación"})
 
-# Aprobar o rechazar (solo admin)
 @app.route("/api/experiencias/<int:id>/validar", methods=["PUT"])
 def validar_experiencia(id):
     payload = verificar_token(request)
@@ -351,7 +345,6 @@ def validar_experiencia(id):
     db.close()
     return jsonify({"message": f"Experiencia {estado}"})
 
-# Eliminar (solo admin)
 @app.route("/api/experiencias/<int:id>", methods=["DELETE"])
 def delete_experiencia(id):
     payload = verificar_token(request)
@@ -363,6 +356,141 @@ def delete_experiencia(id):
     db.commit()
     db.close()
     return jsonify({"message": "Experiencia eliminada"})
+
+# ── RESERVAS ──────────────────────────────────────
+
+def crear_tabla_reservas():
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS reservas (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                experiencia_id INT NOT NULL,
+                turista_id INT NOT NULL,
+                fecha DATE NOT NULL,
+                num_personas INT NOT NULL,
+                comentario TEXT,
+                estado ENUM('pendiente','aceptada','rechazada') DEFAULT 'pendiente',
+                motivo_rechazo TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (experiencia_id) REFERENCES experiencias(id),
+                FOREIGN KEY (turista_id) REFERENCES users(id)
+            )
+        """)
+    db.commit()
+    db.close()
+
+crear_tabla_reservas()
+
+# Turista crea una reserva
+@app.route("/api/reservas", methods=["POST"])
+def crear_reserva():
+    payload = verificar_token(request)
+    if not payload:
+        return jsonify({"message": "Token requerido"}), 401
+    if payload["rol"] != "turista":
+        return jsonify({"message": "Solo los turistas pueden reservar"}), 403
+    data = request.json
+    experiencia_id = data.get("experiencia_id")
+    fecha = data.get("fecha")
+    num_personas = data.get("num_personas")
+    comentario = data.get("comentario", "")
+    if not experiencia_id or not fecha or not num_personas:
+        return jsonify({"message": "Faltan campos requeridos"}), 400
+    try:
+        db = get_db()
+        with db.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO reservas (experiencia_id, turista_id, fecha, num_personas, comentario)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (experiencia_id, payload["id"], fecha, num_personas, comentario))
+        db.commit()
+        db.close()
+        return jsonify({"message": "Solicitud de reserva enviada"}), 201
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+# Guía ve las reservas de sus experiencias
+@app.route("/api/reservas/mis-solicitudes", methods=["GET"])
+def get_mis_solicitudes():
+    payload = verificar_token(request)
+    if not payload:
+        return jsonify({"message": "Token requerido"}), 401
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute("""
+            SELECT r.*, e.titulo as experiencia_titulo, e.precio,
+                   u.nombre as turista_nombre, u.email as turista_email
+            FROM reservas r
+            JOIN experiencias e ON r.experiencia_id = e.id
+            JOIN users u ON r.turista_id = u.id
+            WHERE e.guia_id = %s
+            ORDER BY r.created_at DESC
+        """, (payload["id"],))
+        solicitudes = cursor.fetchall()
+    db.close()
+    for s in solicitudes:
+        if isinstance(s.get("created_at"), datetime):
+            s["created_at"] = s["created_at"].isoformat()
+        if isinstance(s.get("fecha"), datetime):
+            s["fecha"] = s["fecha"].isoformat()
+    return jsonify(solicitudes)
+
+# Guía acepta o rechaza una reserva
+@app.route("/api/reservas/<int:id>/responder", methods=["PUT"])
+def responder_reserva(id):
+    payload = verificar_token(request)
+    if not payload:
+        return jsonify({"message": "Token requerido"}), 401
+    data = request.json
+    estado = data.get("estado")
+    motivo = data.get("motivo_rechazo", "")
+    if estado not in ["aceptada", "rechazada"]:
+        return jsonify({"message": "Estado inválido"}), 400
+    db = get_db()
+    with db.cursor() as cursor:
+        # Verificar que la reserva pertenece a una experiencia del guía
+        cursor.execute("""
+            SELECT r.* FROM reservas r
+            JOIN experiencias e ON r.experiencia_id = e.id
+            WHERE r.id = %s AND e.guia_id = %s
+        """, (id, payload["id"]))
+        reserva = cursor.fetchone()
+    if not reserva:
+        return jsonify({"message": "Reserva no encontrada o sin permisos"}), 404
+    with db.cursor() as cursor:
+        cursor.execute("""
+            UPDATE reservas SET estado=%s, motivo_rechazo=%s WHERE id=%s
+        """, (estado, motivo, id))
+    db.commit()
+    db.close()
+    return jsonify({"message": f"Reserva {estado}"})
+
+# Turista ve sus propias reservas
+@app.route("/api/reservas/mis-reservas", methods=["GET"])
+def get_mis_reservas():
+    payload = verificar_token(request)
+    if not payload:
+        return jsonify({"message": "Token requerido"}), 401
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute("""
+            SELECT r.*, e.titulo as experiencia_titulo, e.precio,
+                   u.nombre as guia_nombre
+            FROM reservas r
+            JOIN experiencias e ON r.experiencia_id = e.id
+            JOIN users u ON e.guia_id = u.id
+            WHERE r.turista_id = %s
+            ORDER BY r.created_at DESC
+        """, (payload["id"],))
+        reservas = cursor.fetchall()
+    db.close()
+    for r in reservas:
+        if isinstance(r.get("created_at"), datetime):
+            r["created_at"] = r["created_at"].isoformat()
+        if isinstance(r.get("fecha"), datetime):
+            r["fecha"] = r["fecha"].isoformat()
+    return jsonify(reservas)
 
 # ── RESEÑAS ──────────────────────────────────────
 
@@ -417,8 +545,8 @@ def crear_resena():
         return jsonify({"message": "Reseña publicada"}), 201
     except Exception as e:
         return jsonify({"message": str(e)}), 500
-    
-    # ── MENU ITEMS (Gastronomía) ──────────────────────
+
+# ── MENU ITEMS ────────────────────────────────────
 
 @app.route("/api/menu/<int:producto_id>", methods=["GET"])
 def get_menu(producto_id):
