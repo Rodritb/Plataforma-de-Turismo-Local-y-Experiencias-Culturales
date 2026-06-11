@@ -1,2 +1,94 @@
 CREATE DATABASE turismo_db;
+CREATE DATABASE IF NOT EXISTS turismo_db;
+USE turismo_db;
 
+-- ── Tabla principal de usuarios ──────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    rol ENUM('turista','guia_turistico','guia_gastronomico','anfitrion','admin') DEFAULT 'turista',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ── Tabla de experiencias ─────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS experiencias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(200) NOT NULL,
+    descripcion TEXT NOT NULL,
+    categoria ENUM('tour_turistico','gastronomia') NOT NULL,
+    precio DECIMAL(10,2) NOT NULL,
+    duracion FLOAT NOT NULL,
+    capacidad INT NOT NULL,
+    imagen_url VARCHAR(500),
+    servicios TEXT,
+    horarios TEXT,
+    latitud DECIMAL(10,7),
+    longitud DECIMAL(10,7),
+    estado ENUM('pendiente','aprobada','rechazada') DEFAULT 'pendiente',
+    motivo_rechazo TEXT,
+    guia_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (guia_id) REFERENCES users(id)
+);
+
+-- ── Imágenes extra por experiencia ────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS experiencia_imagenes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    experiencia_id INT NOT NULL,
+    imagen_url VARCHAR(500) NOT NULL,
+    titulo VARCHAR(200),
+    descripcion TEXT,
+    orden INT DEFAULT 0,
+    FOREIGN KEY (experiencia_id) REFERENCES experiencias(id) ON DELETE CASCADE
+);
+
+-- ── Reservas ──────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS reservas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    experiencia_id INT NOT NULL,
+    turista_id INT NOT NULL,
+    fecha DATE NOT NULL,
+    num_personas INT NOT NULL,
+    comentario TEXT,
+    estado ENUM('pendiente','aceptada','rechazada') DEFAULT 'pendiente',
+    motivo_rechazo TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (experiencia_id) REFERENCES experiencias(id),
+    FOREIGN KEY (turista_id) REFERENCES users(id)
+);
+
+-- ── Reseñas con estrellas ─────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS resenas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    experiencia_id INT NOT NULL,
+    turista_id INT NOT NULL,
+    estrellas INT NOT NULL,
+    comentario TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_estrellas CHECK (estrellas BETWEEN 1 AND 5),
+    UNIQUE KEY una_resena_por_turista (experiencia_id, turista_id),
+    FOREIGN KEY (experiencia_id) REFERENCES experiencias(id) ON DELETE CASCADE,
+    FOREIGN KEY (turista_id) REFERENCES users(id)
+);
+
+-- ── Menú items (gastronomía) ──────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS menu_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    producto_id INT NOT NULL,
+    nombre VARCHAR(200) NOT NULL,
+    categoria ENUM('entrada','plato_principal','bebida','postre','otro') DEFAULT 'plato_principal',
+    precio DECIMAL(10,2) NOT NULL,
+    descripcion TEXT,
+    FOREIGN KEY (producto_id) REFERENCES experiencias(id) ON DELETE CASCADE
+);
+
+-- ── Si ya tenías la BD y quieres agregar las columnas nuevas ──────────────────
+-- (ejecuta solo si ya existe la tabla experiencias sin esas columnas)
+-- ALTER TABLE experiencias ADD COLUMN IF NOT EXISTS servicios TEXT;
+-- ALTER TABLE experiencias ADD COLUMN IF NOT EXISTS horarios TEXT;
+-- ALTER TABLE experiencias ADD COLUMN IF NOT EXISTS latitud DECIMAL(10,7);
+-- ALTER TABLE experiencias ADD COLUMN IF NOT EXISTS longitud DECIMAL(10,7);
+   ALTER TABLE experiencias ADD COLUMN horarios VARCHAR(255);
+   ALTER TABLE experiencias ADD COLUMN servicios VARCHAR(255);

@@ -4,8 +4,8 @@ import Register from "./pages/Register";
 import AdminPanel from "./pages/AdminPanel";
 import MiPerfil from "./pages/MiPerfil";
 import Experiencias from "./pages/Experiencias";
+import DetalleExperiencia from "./pages/DetalleExperiencia";
 import PanelGuia from "./pages/PanelGuia";
-import DetalleExperiencia from "./pages/DetalleExperiencia"; // ← AGREGAR
 
 function RutaProtegida({ children, rolRequerido, rolesPermitidos }) {
   const token = localStorage.getItem("token");
@@ -23,17 +23,21 @@ export default function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
         <Route path="/experiencias" element={
           <RutaProtegida><Experiencias /></RutaProtegida>
         } />
+
+        {/* Nueva ruta: detalle de experiencia */}
         <Route path="/experiencias/:id" element={
           <RutaProtegida><DetalleExperiencia /></RutaProtegida>
         } />
+
         <Route path="/admin" element={
           <RutaProtegida rolRequerido="admin"><AdminPanel /></RutaProtegida>
         } />
         <Route path="/panel-guia" element={
-          <RutaProtegida rolesPermitidos={["guia_turistico","guia_gastronomico","anfitrion"]}>
+          <RutaProtegida rolesPermitidos={["guia_turistico", "guia_gastronomico", "anfitrion"]}>
             <PanelGuia />
           </RutaProtegida>
         } />
@@ -43,5 +47,4 @@ export default function App() {
       </Routes>
     </BrowserRouter>
   );
-  
 }
