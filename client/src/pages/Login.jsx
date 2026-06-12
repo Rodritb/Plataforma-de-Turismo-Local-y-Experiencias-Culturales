@@ -3,7 +3,7 @@ import turistaImg from "../assets/iconos/turista.jpg";
 import adminImg from "../assets/iconos/administrator.jpg";
 import fondoImg from "../assets/iconos/sucre.png";
 
-const API_URL = "http://localhost:3000/api/auth/login";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/auth/login`;
 
 const ROLES = [
   { id: "turista", label: "Turista", icon: turistaImg, desc: "Explora y reserva experiencias" },
