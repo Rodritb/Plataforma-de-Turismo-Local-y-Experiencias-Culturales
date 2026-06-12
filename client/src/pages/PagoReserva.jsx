@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import qrImage from "../assets/iconos/qr-pago.jpeg";
 
-const API_RESERVAS = "http://localhost:3000/api/reservas";
+const API_RESERVAS = `${import.meta.env.VITE_API_URL}/api/reservas`;
 
 export default function PagoReserva() {
   const { id }     = useParams();
