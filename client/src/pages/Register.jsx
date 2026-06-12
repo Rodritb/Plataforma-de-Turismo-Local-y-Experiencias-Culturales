@@ -7,7 +7,7 @@ const ROLES = [
   { id: "turista",           label: "Turista",             icon: "🧳", desc: "Quiero explorar y reservar experiencias turísticas" },
   { id: "guia_turistico",    label: "Guía Turístico",       icon: "🗺️", desc: "Ofrezco recorridos y tours culturales" },
   { id: "guia_gastronomico", label: "Guía Gastronómico",    icon: "🍽️", desc: "Ofrezco experiencias de cocina y gastronomía" },
-  { id: "anfitrion",         label: "Anfitrión",            icon: "🏨", desc: "Recibo turistas y ofrezco servicios locales" },
+  { id: "admin",         label: "Administrador",            icon: "🏨", desc: "Recibo turistas y ofrezco servicios locales" },
 ];
 
 export default function Register() {
