@@ -1,7 +1,7 @@
 import { useState } from "react";
 import fondoImg from "../assets/iconos/sucre.png";
 
-const API_URL = "http://localhost:3000/api/auth/register";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/auth/register`;
 
 const ROLES = [
   { id: "turista",           label: "Turista",             icon: "🧳", desc: "Quiero explorar y reservar experiencias turísticas" },
