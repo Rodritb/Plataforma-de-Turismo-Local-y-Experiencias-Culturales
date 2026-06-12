@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/auth/login`;
-const API_EXP = "http://localhost:3000/api/experiencias/todas";
+const API_BASE = import.meta.env.VITE_API_URL;
+const API_USERS = `${API_BASE}/api/users`;
+const API_EXP = `${API_BASE}/api/experiencias/todas`;
 
 function getToken() { return localStorage.getItem("token"); }
 
@@ -80,7 +81,7 @@ export default function AdminPanel() {
 
   async function validarExperiencia(id, estado) {
     if (estado === "rechazada" && !motivoRechazo) { mostrarMensaje("Escribe el motivo de rechazo", true); return; }
-    const res = await fetch(`http://localhost:3000/api/experiencias/${id}/validar`, {
+    const res = await fetch(`${API_BASE}/api/experiencias/${id}/validar`, {
       method: "PUT",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
       body: JSON.stringify({ estado, motivo_rechazo: motivoRechazo }),
@@ -94,7 +95,7 @@ export default function AdminPanel() {
 
   async function eliminarExperiencia(id) {
     if (!confirm("¿Eliminar esta experiencia?")) return;
-    await fetch(`http://localhost:3000/api/experiencias/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${getToken()}` } });
+   await fetch(`${API_BASE}/api/experiencias/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${getToken()}` } });
     mostrarMensaje("Experiencia eliminada ✓");
     cargarExperiencias();
   }
