@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 
-const API = "http://localhost:3000/api/experiencias";
-const API_MENU = "http://localhost:3000/api/menu";
-const API_RESERVAS = "http://localhost:3000/api/reservas";
+const API = `${import.meta.env.VITE_API_URL}/api/experiencias`;
+const API_MENU = `${import.meta.env.VITE_API_URL}/api/menu`;
+const API_RESERVAS = `${import.meta.env.VITE_API_URL}/api/reservas`;
 
 function getToken() { return localStorage.getItem("token"); }
 function getUser()  { return JSON.parse(localStorage.getItem("user") || "null"); }
