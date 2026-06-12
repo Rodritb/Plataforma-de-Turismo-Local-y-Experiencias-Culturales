@@ -6,7 +6,7 @@ import iconTurista from "../assets/iconos/turista.jpg";
 import iconCorreo from "../assets/iconos/correo.jpg";
 import iconTarjeta from "../assets/iconos/tarjeta.png";
 
-const API_RESERVAS = "http://localhost:3000/api/reservas";
+const API_RESERVAS = `${import.meta.env.VITE_API_URL}/api/reservas`;
 
 export default function MiPerfil() {
   const [user, setUser]         = useState(null);
