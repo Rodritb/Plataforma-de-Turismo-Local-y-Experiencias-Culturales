@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import vistaImg from "../assets/vista.jpg";
 
-const API = "http://localhost:3000/api/experiencias";
+const API = `${import.meta.env.VITE_API_URL}/api/experiencias`;
 
 export default function Experiencias() {
   const [experiencias, setExperiencias] = useState([]);
