@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-const API          = "http://localhost:3000/api/experiencias";
-const API_RESERVAS = "http://localhost:3000/api/reservas";
-const API_MENU     = "http://localhost:3000/api/menu";
+const API          = `${import.meta.env.VITE_API_URL}/api/experiencias`;
+const API_RESERVAS = `${import.meta.env.VITE_API_URL}/api/reservas`;
+const API_MENU     = `${import.meta.env.VITE_API_URL}/api/menu`;
 
 export default function DetalleExperiencia() {
   const { id }   = useParams();
